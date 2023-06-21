@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+</head>
+<body>
+  <h1>Welcome to the Dashboard!</h1>
+
+  {% if user.is_vendor %}
+  <a href="{% url 'add_coin' %}" class="btn btn-primary">Add Coin</a>
+  {% endif %}
+
+  <table>
+    <thead>
+      <tr>
+        <th>Coin Name</th>
+        <th>Number of Coins</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for owned_coin in owned_coins %}
+        <tr>
+          <td>{{ owned_coin.coin }}</td>
+          <td>{{ owned_coin.coin_quantity }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <a href="{% url 'buy_coins' %}">Buy Coins</a>
+
+  <form method="post" action="{% url 'dashboard' %}">
+    {% csrf_token %}
+    <button type="submit" name="logout">Logout</button>
+  </form>
+</body>
+</html>

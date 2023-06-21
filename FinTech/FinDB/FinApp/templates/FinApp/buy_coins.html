@@ -1,0 +1,36 @@
+<h2>Buy Coins</h2>
+<form method="post" action="{% url 'buy_coins' %}">
+    {% csrf_token %}
+    <label for="coin_name">Coin:</label>
+    <select name="coin_name" id="coin_name">
+        {% for coin in coins %}
+            <option value="{{ coin.coin_name }}">{{ coin.coin_name }} - ${{ coin.coin_value }}</option>
+        {% endfor %}
+    </select>
+    <br>
+    <label for="quantity">Quantity:</label>
+    <input type="number" name="quantity" id="quantity">
+    <br>
+    <label for="total_price">Total Price:</label>
+    <span id="total_price">$0.00</span>
+    <br>
+    <button type="submit">Buy</button>
+</form>
+
+<script>
+    // Calculate and update the total price based on the selected coin and quantity
+    const coinSelect = document.getElementById('coin_name');
+    const quantityInput = document.getElementById('quantity');
+    const totalPriceSpan = document.getElementById('total_price');
+
+    coinSelect.addEventListener('change', updateTotalPrice);
+    quantityInput.addEventListener('input', updateTotalPrice);
+
+    function updateTotalPrice() {
+        const coinPrice = parseFloat(coinSelect.options[coinSelect.selectedIndex].text.split(' - $')[1]);
+        const quantity = parseFloat(quantityInput.value);
+        const totalPrice = coinPrice * quantity;
+
+        totalPriceSpan.textContent = '$' + totalPrice.toFixed(2);
+    }
+</script>
