@@ -10,6 +10,18 @@
   <a href="{% url 'add_coin' %}" class="btn btn-primary">Add Coin</a>
   {% endif %}
 
+  {% if user.is_vendor %}
+  <a href="{% url 'add_food_drink_item' %}">Add Food and Drink Item</a>
+  {% endif %}
+
+  {% if request.user.is_vendor %}
+    <a href="{% url 'create_pending_transaction' %}" class="btn btn-primary">Checkout</a>
+  {% endif %}
+
+  {% if not request.user.is_vendor %}
+    <a href="{% url 'approve_pending_transactions' %}" class="btn btn-primary">Approve Pending Transaction</a>
+  {% endif %}
+
   <table>
     <thead>
       <tr>

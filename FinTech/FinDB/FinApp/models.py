@@ -1,10 +1,9 @@
-from django.db import models
-
 # Create your models here.
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 
+# Adding a CustomUser class
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, username, password, **extra_fields):
         if not email:
@@ -51,7 +50,11 @@ class CustomUser(AbstractBaseUser):
     def has_module_perms(self, app_label):
         return self.is_superuser
 
+    class Meta:
+        db_table = 'custom_user'
 
+
+# Adding a CustomCoin class
 class CustomCoinManager(models.Manager):
     def create_coin(self, coin_name, coin_value, **extra_fields):
         if not coin_name:
@@ -77,6 +80,7 @@ class UserCoinManager(models.Manager):
     pass
 
 
+# Adding the UserCoin Class
 class UserCoin(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     coin = models.ForeignKey(Coin, on_delete=models.CASCADE)
@@ -84,23 +88,49 @@ class UserCoin(models.Model):
     objects = UserCoinManager()
 
 
+class TransactionsManager(models.Manager):
+    def create_transaction(self, sender, receiver, coin, amount, **extra_fields):
+        transaction = self.model(sender=sender, receiver=receiver, coin=coin, amount=amount, **extra_fields)
+        transaction.save()
+        return transaction
+
+    def save_transaction(self, sender, receiver, coin, amount, **extra_fields):
+        transaction = self.create_transaction(sender, receiver, coin, amount, **extra_fields)
+        return transaction
+
+
+# Adding the Transactions class
 class Transactions(models.Model):
     sender = models.ForeignKey(CustomUser, related_name='Sender', on_delete=models.CASCADE)
     receiver = models.ForeignKey(CustomUser, related_name='Receiver', on_delete=models.CASCADE)
     coin = models.ForeignKey(Coin, on_delete=models.CASCADE)
     amount = models.IntegerField()
-    timestamp = models.DateTimeField(auto_now_add=True)
 
-    def save_transaction(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        self.update_sender_receiver_quantity()
+    objects = TransactionsManager()
 
-    def update_sender_receiver_quantity(self):
-        sender_user_coin = UserCoin.objects.get(user=self.sender, coin=self.coin)
-        receiver_user_coin = UserCoin.objects.get(user=self.receiver, coin=self.coin)
 
-        sender_user_coin.quantity -= self.amount
-        receiver_user_coin.quantity += self.amount
+# adding the Class to store Foods and Drinks
+class FoodDrinkItem(models.Model):
+    name = models.CharField(max_length=100)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    coin = models.ForeignKey(Coin, on_delete=models.CASCADE)
+    vendor = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
 
-        sender_user_coin.save()
-        receiver_user_coin.save()
+    def __str__(self):
+        return self.name
+
+
+# Adding two PendingTransaction Classes for transactions that do not have been approved yet
+class PendingTransaction(models.Model):
+    vendor = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='customer')
+    coin = models.ForeignKey(Coin, on_delete=models.CASCADE)
+    amount = models.IntegerField(default=0)
+
+
+class PendingTransactionItem(models.Model):
+    transaction = models.ForeignKey(PendingTransaction, on_delete=models.CASCADE)
+    food_drink_item = models.ForeignKey(FoodDrinkItem, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    coin = models.ForeignKey(Coin, on_delete=models.CASCADE, default="")
+    total_price = models.PositiveIntegerField(default=1)

@@ -1,5 +1,6 @@
 from django import forms
-from .models import CustomUser, Coin
+from .models import CustomUser, Coin, FoodDrinkItem
+from django.forms import formset_factory
 
 
 class RegistrationForm(forms.ModelForm):
@@ -32,3 +33,22 @@ class CoinForm(forms.ModelForm):
     class Meta:
         model = Coin
         fields = ['coin_name', 'coin_value']
+
+
+class FoodDrinkItemForm(forms.ModelForm):
+    name = forms.CharField(max_length=100)
+    price = forms.DecimalField(max_digits=100, decimal_places=2)
+
+    class Meta:
+        model = FoodDrinkItem
+        fields = ['name', 'price', 'coin']
+
+
+class ItemForm(forms.Form):
+    item = forms.ModelChoiceField(queryset=FoodDrinkItem.objects.all())
+    quantity = forms.IntegerField(min_value=1)
+
+
+class PendingTransactionForm(forms.Form):
+    items = formset_factory(ItemForm, extra=1)
+    user = forms.ModelChoiceField(queryset=CustomUser.objects.all())

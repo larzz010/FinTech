@@ -1,0 +1,48 @@
+<!-- checkout.html -->
+
+<form method="post" action="{% url 'checkout' %}">
+  {% csrf_token %}
+
+  <!-- Display the available food and drink items -->
+  <label for="item">Select Item:</label>
+  <select name="item_id" id="item">
+    {% for item in food_drink_items %}
+      <option value="{{ item.id }}">{{ item.name }}</option>
+    {% endfor %}
+  </select>
+
+  <!-- Input field for quantity -->
+  <label for="quantity">Quantity:</label>
+  <input type="number" name="quantity" id="quantity" min="1">
+
+  <!-- Display the coin associated with the selected item -->
+  <label for="coin">Coin:</label>
+  <input type="text" name="coin_id" id="coin" readonly>
+
+  <input type="hidden" name="user_id" value="{{ request.user.id }}">
+  <button type="submit">Checkout</button>
+</form>
+
+<script>
+  // JavaScript code to automatically set the coin based on the selected item
+  var itemSelect = document.getElementById('item');
+  var coinInput = document.getElementById('coin');
+
+  itemSelect.addEventListener('change', function() {
+    var selectedItemId = this.value;
+    var selectedCoinId = null;
+
+    // Find the selected item from the food_drink_items list
+    var selectedItem = food_drink_items.find(function(item) {
+      return item.id === selectedItemId;
+    });
+
+    // Retrieve the coin ID from the selected item
+    if (selectedItem) {
+      selectedCoinId = selectedItem.coin_id;
+    }
+
+    // Set the coin input value to the selected coin ID
+    coinInput.value = selectedCoinId;
+  });
+</script>

@@ -1,0 +1,26 @@
+ <table>
+  <thead>
+    <tr>
+      <th>Transaction ID</th>
+      <th>Vendor</th>
+      <th>Total Coins Used</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for transaction in pending_transactions %}
+    <tr>
+      <td>{{ transaction.id }}</td>
+      <td>{{ transaction.vendor }}</td>
+      <td>{{ transaction.total_coins_used }}</td>
+      <td>
+        <form method="POST" action="{% url 'approve_pending_transactions' %}">
+          {% csrf_token %}
+          <input type="hidden" name="transaction_id" value="{{ transaction.id }}">
+          <button type="submit">Approve</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

@@ -1,0 +1,18 @@
+<form method="post" action="{% url 'create_pending_transaction' %}">
+  {% csrf_token %}
+
+  {{ form.as_p }}
+
+  <h3>Items</h3>
+  {{ form.items.management_form }}
+  {% for item_form in form.items %}
+    <div>
+      {{ item_form.item.label_tag }}
+      {{ item_form.item }}
+      {{ item_form.quantity.label_tag }}
+      {{ item_form.quantity }}
+    </div>
+  {% endfor %}
+
+  <button type="submit">Create Pending Transaction</button>
+</form>
